@@ -1,0 +1,17 @@
+{application, syslogger,
+ [{description, "A syslog backend for erlang logger"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, { syslogger_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    syslog
+   ]},
+  {env,[{handlers, [{syslogger_default, #{}}]}]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
