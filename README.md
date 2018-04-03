@@ -28,8 +28,8 @@ For instance if you want to add two handlers that log to two different syslog
 facilities just add this to your sys.config.
 
     {syslogger,
-      {handler, [{user_syslogger, #{ facility => user }},
-                 {local0_syslogger, #{ facility => local0 }}]
+      {handlers, [{user_syslogger, #{ facility => user }},
+                  {local0_syslogger, #{ facility => local0 }}]
        }
     }.
 
