@@ -41,4 +41,4 @@ init([]) ->
 %%====================================================================
 
 add_handler({HandlerId, Config}) ->
-    ok = logger:add_handler(HandlerId, syslogger, Config#{ filter_default => log }).
+    ok = logger:add_handler(HandlerId, syslogger, Config).

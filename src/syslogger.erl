@@ -7,17 +7,14 @@
 
 -export([adding_handler/2, log/2]).
 
-adding_handler(Id, #{ ident := Ident, log_opts := LogOpts,
-                      facility := Facility} = Config) ->
-    spawn(fun() -> ok = logger:set_formatter(Id, logger_formatter, #{single_line => true}) end),
+adding_handler(_Id, #{ ident := Ident, log_opts := LogOpts,
+                       facility := Facility} = Config) ->
     {ok, LogHandle} = syslog:open(Ident, LogOpts, Facility),
-    {ok, Config#{ handle => LogHandle }};
+    {ok, Config#{ handle => LogHandle,
+                  formatter := {logger_formatter, #{single_line => true}}}};
 adding_handler(Id, Config) ->
     adding_handler(Id, maps:merge(Config, default_config())).
 
-log(#{msg := {report, R}, meta := Meta } = Log, Config) ->
-    Fun = maps:get(report_cb, Meta, fun default_report_cb/1),
-    log(Log#{ msg := Fun(R) }, Config);
 log(Log, #{ handle := Handle, formatter := {FModule, FConfig}}) ->
     syslog:log(Handle, level(Log), "~s", [FModule:format(Log, FConfig)]).
 
@@ -38,6 +35,3 @@ default_config() ->
        log_opts => [cons, pid, perror],
        facility => user
      }.
-
-default_report_cb(R) ->
-    {"~p",[R]}.
