@@ -16,7 +16,9 @@ adding_handler(Id, Config) ->
     adding_handler(Id, maps:merge(Config, default_config())).
 
 log(Log, #{ handle := Handle, formatter := {FModule, FConfig}}) ->
-    syslog:log(Handle, level(Log), "~s", [FModule:format(Log, FConfig)]).
+    syslog:log(Handle, level(Log),
+               unicode:characters_to_binary(
+                 io_lib:format("~ts",[FModule:format(Log, FConfig)]))).
 
 level(#{ level := Level }) ->
     level(Level);
