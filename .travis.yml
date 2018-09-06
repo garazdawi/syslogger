@@ -1,0 +1,27 @@
+os: linux
+language: erlang
+sudo: required
+
+matrix:
+  include:
+    - otp_release:
+        - 21.0
+    - otp_release:
+        - 21.0
+      env:
+        - CONFIGURE_FLAGS=--host=aarch64-linux-gnu
+        - CPPFLAGS="-I $HOME/otp/21.0/usr/include/"
+      before_install:
+        - sudo apt-get install gcc-aarch64-linux-gnu
+      script:
+        - V=1 ./rebar3 compile
+    - os: osx
+      language: c
+      before_install:
+        - brew install erlang
+
+before_script:
+  - wget https://s3.amazonaws.com/rebar3/rebar3 && chmod +x rebar3
+
+script:
+  - V=1 ./rebar3 ct

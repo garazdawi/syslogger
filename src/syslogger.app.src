@@ -1,14 +1,13 @@
 {application, syslogger,
- [{description, "A syslog backend for erlang logger"},
+ [{description, "A syslog backend for Erlang logger"},
   {vsn, "0.1.0"},
   {registered, []},
   {mod, { syslogger_app, []}},
   {applications,
    [kernel,
-    stdlib,
-    syslog
+    stdlib
    ]},
-  {env,[{handlers, [{syslogger_default, #{}}]}]},
+  {env,[{handlers, [{syslogger, #{}}]}]},
   {modules, []},
 
   {maintainers, []},

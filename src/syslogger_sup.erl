@@ -28,6 +28,11 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
+    ok = syslogger:open(
+           application:get_env(syslogger, ident, undefined),
+           application:get_env(syslogger, log_opts, undefined),
+           application:get_env(syslogger, facility, undefined)
+          ),
     case application:get_env(syslogger, handlers) of
         {ok, Handlers} ->
             lists:foreach(fun add_handler/1, Handlers);
