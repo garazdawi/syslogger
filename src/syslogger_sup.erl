@@ -33,17 +33,9 @@ init([]) ->
            application:get_env(syslogger, log_opts, undefined),
            application:get_env(syslogger, facility, undefined)
           ),
-    case application:get_env(syslogger, handlers) of
-        {ok, Handlers} ->
-            lists:foreach(fun add_handler/1, Handlers);
-        undefined ->
-            ok
-    end,
+    logger:add_handlers(syslogger),
     {ok, { {one_for_all, 0, 1}, []} }.
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
-
-add_handler({HandlerId, Config}) ->
-    ok = logger:add_handler(HandlerId, syslogger, Config).

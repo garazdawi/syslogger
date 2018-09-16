@@ -61,13 +61,6 @@ static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data,
     return 0;
 }
 
-
-static ERL_NIF_TERM
-open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return enif_make_atom(env, "ok");
-}
-
 static int
 get_facility(ErlNifEnv* env, const ERL_NIF_TERM facility)
 {
@@ -78,21 +71,15 @@ ATOMS
 }
 
 static ERL_NIF_TERM
-log_priority(ErlNifEnv* env, int level, const ERL_NIF_TERM facility, const ERL_NIF_TERM msg)
+open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     int facility = get_facility(env, argv[2]);
     int logopts = 0;
-    ErlNifBinary bin;
+    ErlNifBinary ident;
     ERL_NIF_TERM value;
-    char *ident;
 
-    if (enif_inspect_iolist_as_binary(env, argv[0], &bin) == 0)
+    if (enif_inspect_iolist_as_binary(env, argv[0], &ident) == 0)
         return enif_make_badarg(env);
-
-    /* openlog uses the given buffer, so we have to make a copy of it. */
-    ident = enif_alloc(bin.size + 1);
-    memcpy(ident, bin.data, bin.size);
-    ident[bin.size] = '\0';
 
 #ifdef LOG_CONS
     if (enif_get_map_value(env, argv[1], enif_make_atom(env, "cons"), &value))
@@ -102,6 +89,16 @@ log_priority(ErlNifEnv* env, int level, const ERL_NIF_TERM facility, const ERL_N
 #ifdef LOG_NDELAY
     if (enif_get_map_value(env, argv[1], enif_make_atom(env, "ndelay"), &value))
         logopts |= LOG_NDELAY;
+#endif
+
+#ifdef LOG_NOWAIT
+    if (enif_get_map_value(env, argv[1], enif_make_atom(env, "nowait"), &value))
+        logopts |= LOG_NOWAIT;
+#endif
+
+#ifdef LOG_ODELAY
+    if (enif_get_map_value(env, argv[1], enif_make_atom(env, "odelay"), &value))
+        logopts |= LOG_ODELAY;
 #endif
 
 #ifdef LOG_PERROR
@@ -114,68 +111,76 @@ log_priority(ErlNifEnv* env, int level, const ERL_NIF_TERM facility, const ERL_N
         logopts |= LOG_PID;
 #endif
 
-    openlog(ident, logopts, facility);
+    openlog((char *)ident.data, logopts, facility);
     return enif_make_atom(env, "ok");
 }
 
 static ERL_NIF_TERM
-log_emergency(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+init(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-    return log_priority(env, LOG_EMERG, argv[0], argv[1]);
+    int facility = get_facility(env, argv[0]);
+    ERL_NIF_TERM res, level_map;
+    ERL_NIF_TERM lm_keys[] = {
+        enif_make_atom(env, "emergency"),
+        enif_make_atom(env, "alert"),
+        enif_make_atom(env, "critical"),
+        enif_make_atom(env, "error"),
+        enif_make_atom(env, "warning"),
+        enif_make_atom(env, "notice"),
+        enif_make_atom(env, "info"),
+        enif_make_atom(env, "debug")
+    };
+    ERL_NIF_TERM lm_values[] = {
+        enif_make_int(env, LOG_EMERG),
+        enif_make_int(env, LOG_ALERT),
+        enif_make_int(env, LOG_CRIT),
+        enif_make_int(env, LOG_ERR),
+        enif_make_int(env, LOG_WARNING),
+        enif_make_int(env, LOG_NOTICE),
+        enif_make_int(env, LOG_INFO),
+        enif_make_int(env, LOG_DEBUG)
+    };
+
+    if (enif_make_map_from_arrays(env, lm_keys, lm_values,
+                                  sizeof(lm_values) / sizeof(*lm_values),
+                                  &level_map)) {
+        ERL_NIF_TERM res_keys[] = {
+            enif_make_atom(env, "bfacility"),
+            enif_make_atom(env, "level_map")
+        };
+        ERL_NIF_TERM res_values[] = {
+            enif_make_int(env, facility),
+            level_map
+        };
+        if (enif_make_map_from_arrays(env, res_keys, res_values,
+                                      sizeof(res_values) / sizeof(*res_values),
+                                      &res))
+            return res;
+    }
+    return enif_make_badarg(env);
 }
 
 static ERL_NIF_TERM
-log_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+do_syslog(ErlNifEnv* env,  int argc, const ERL_NIF_TERM argv[])
 {
-    return log_priority(env, LOG_ALERT, argv[0], argv[1]);
-}
+    ErlNifBinary bin;
+    int levelfacility;
 
-static ERL_NIF_TERM
-log_critical(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_CRIT, argv[0], argv[1]);
-}
+    if (enif_inspect_iolist_as_binary(env, argv[1], &bin) == 0)
+        return enif_make_badarg(env);
 
-static ERL_NIF_TERM
-log_error(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_ERR, argv[0], argv[1]);
-}
+    if (enif_get_int(env, argv[0], &levelfacility) == 0)
+        return enif_make_badarg(env);
 
-static ERL_NIF_TERM
-log_warning(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_WARNING, argv[0], argv[1]);
-}
+    syslog(levelfacility, "%s", bin.data);
 
-static ERL_NIF_TERM
-log_notice(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_NOTICE, argv[0], argv[1]);
-}
-
-static ERL_NIF_TERM
-log_info(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_INFO, argv[0], argv[1]);
-}
-
-static ERL_NIF_TERM
-log_debug(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    return log_priority(env, LOG_DEBUG, argv[0], argv[1]);
+    return enif_make_atom(env, "ok");
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"log_open", 3, open},
-    {"log_emergency", 2, log_emergency},
-    {"log_alert", 2, log_alert},
-    {"log_critical", 2, log_critical},
-    {"log_error", 2, log_error},
-    {"log_warning", 2, log_warning},
-    {"log_notice", 2, log_notice},
-    {"log_info", 2, log_info},
-    {"log_debug", 2, log_debug}
+    {"syslog_open", 3, open},
+    {"syslog", 2, do_syslog},
+    {"syslog_init", 1, init},
 };
 
 ERL_NIF_INIT(syslogger, nif_funcs, load, NULL, upgrade, unload);

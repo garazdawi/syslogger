@@ -24,6 +24,19 @@ You need to have Erlang/OTP, a C compiler, rebar3 and the autoconf toolchain ins
 
     apt-get install build-essential autoconf libtool
 
+Recommended Configuration
+-------------------------
+
+If you just want to get started with syslogger, the recommended configuration in
+the system's sys.config is:
+
+    {kernel, logger, [{handler, default, undefined}]}.
+    {syslogger,
+      {log_opts, [cons, pid, perror]},
+      {logger, [{handler, default, syslogger,
+                   #{ formatter => {logger_formatter, #{single_line => true}}}}]}
+    }.
+
 Configuration
 -------------
 
@@ -34,8 +47,10 @@ For instance if you want to add two handlers that log to two different syslog
 facilities just add this to your sys.config.
 
     {syslogger,
-      {handlers, [{user_syslogger, #{ facility => user }},
-                  {local0_syslogger, #{ facility => local0 }}]
+      {ident, "myapp"},
+      {log_opts, [cons, pid, perror]},
+      {logger, [{handler, user_syslogger, syslogger, #{ facility => user }},
+                {handler, local0_syslogger, syslogger, #{ facility => local0 }}]
        }
     }.
 
@@ -58,7 +73,7 @@ The openlog call can get the following init at startup:
 - `facility`: The syslog facility to log though.
   - Default: user
 - `log_opts`: The syslog options (as a list) to use.
-  - Default: [cons, pid, perror]
+  - Default: []
 
 For more details of what each of these options do see [syslog(3)](https://linux.die.net/man/3/syslog).
 
