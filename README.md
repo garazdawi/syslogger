@@ -9,12 +9,11 @@ Usage
 The easiest way to use syslogger is to just include it as a dependency
 in your rebar.config like this:
 
-    {deps,
-     [
-      { 'syslogger', "*", {git, "git://github.com/garazdawi/syslogger", {branch, "master"}}}
-     ]
-    }.
-
+```Erlang
+{deps, [
+    { 'syslogger', "*", {git, "git://github.com/garazdawi/syslogger", {branch, "master"}}}
+]}.
+```
 The default configuration is then used and any log messages will turn up in the local syslog.
 
 Build Requirements
@@ -30,12 +29,14 @@ Recommended Configuration
 If you just want to get started with syslogger, the recommended configuration in
 the system's sys.config is:
 
-    {kernel, logger, [{handler, default, undefined}]}.
-    {syslogger,
-      {log_opts, [cons, pid, perror]},
-      {logger, [{handler, default, syslogger,
-                   #{ formatter => {logger_formatter, #{single_line => true}}}}]}
-    }.
+```Erlang
+[{kernel, [
+    {logger, [
+        {handler, default, syslogger #{
+            formatter => {logger_formatter, #{single_line => true}}}}]}]},
+{syslogger, [
+    {log_opts, [cons, pid, perror]}]}].
+```
 
 Configuration
 -------------
@@ -46,20 +47,23 @@ application variables, or by using the `logger:add_handler/2` API.
 For instance if you want to add two handlers that log to two different syslog
 facilities just add this to your sys.config.
 
-    {syslogger,
-      {ident, "myapp"},
-      {log_opts, [cons, pid, perror]},
-      {logger, [{handler, user_syslogger, syslogger, #{ facility => user }},
-                {handler, local0_syslogger, syslogger, #{ facility => local0 }}]
-       }
-    }.
-
+```Erlang
+[{kernel, [
+    {logger, [
+        {handler, user_syslogger, syslogger, #{ facility => user }},
+        {handler, local0_syslogger, syslogger, #{ facility => local0 }}]}]},
+{syslogger, [
+    {ident, "myapp"},
+    {log_opts, [cons, pid, perror]}]}].
+```
 This will add two syslogger instances to the Erlang logger that use different facilities.
 
 The same effect could have been achieved by using the logger API like this:
 
-    logger:add_handler(user_syslogger, syslogger, #{ facility => user }),
-    logger:add_handler(local0_syslogger, syslogger, #{ facility => local0 }).
+```Erlang
+logger:add_handler(user_syslogger, syslogger, #{ facility => user }),
+logger:add_handler(local0_syslogger, syslogger, #{ facility => local0 }).
+```
 
 Each syslogger handler can be configured using a map with these configuration options:
 
