@@ -32,7 +32,8 @@ open(undefined, LogOpts, Facility) ->
     {ok, [Progname]} = init:get_argument(progname),
     open(filename:basename(Progname), LogOpts, Facility);
 open(Ident, LogOpts, Facility) ->
-    syslog_open([Ident,$\0], LogOpts, Facility).
+    MapLogOpts = maps:from_list(proplists:unfold(LogOpts)),
+    syslog_open([Ident,$\0], MapLogOpts, Facility).
 
 syslog_open(_Ident, _LogOpts, _Facility) ->
     not_loaded(?LINE).
