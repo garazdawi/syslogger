@@ -46,14 +46,14 @@ syslog(_LevelFacility, _Str) -> not_loaded(?LINE).
 init() ->
     SoName = case code:priv_dir(?APPNAME) of
         {error, bad_name} ->
-            case filelib:is_dir(filename:join(["..", priv])) of
+            case filelib:is_dir(filename:join(["..", priv, lib])) of
                 true ->
-                    filename:join(["..", priv, ?LIBNAME]);
+                    filename:join(["..", priv, lib, ?LIBNAME]);
                 _ ->
-                    filename:join([priv, ?LIBNAME])
+                    filename:join([priv, lib, ?LIBNAME])
             end;
         Dir ->
-            filename:join([Dir, ?LIBNAME])
+            filename:join([Dir, lib, ?LIBNAME])
     end,
     erlang:load_nif(SoName, 0).
 
