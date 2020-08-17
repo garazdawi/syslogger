@@ -1,7 +1,6 @@
 -module(syslogger).
 
 -on_load(load/0).
--define(LIBNAME, libsyslogger).
 
 -export([adding_handler/1, log/2, open/3]).
 
@@ -49,12 +48,12 @@ load() ->
         {error, bad_name} ->
             case filelib:is_dir(filename:join(["..", priv])) of
                 true ->
-                    filename:join(["..", priv, ?LIBNAME]);
+                    filename:join(["..", priv, libsyslogger]);
                 _ ->
-                    filename:join([priv, ?LIBNAME])
+                    filename:join([priv, libsyslogger])
             end;
         Dir ->
-            filename:join([Dir, ?LIBNAME])
+            filename:join([Dir, libsyslogger])
     end,
     erlang:load_nif(SoName, 0).
 

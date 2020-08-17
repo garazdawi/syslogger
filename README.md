@@ -76,17 +76,3 @@ The openlog call can get the following init at startup:
   - Default: []
 
 For more details of what each of these options do see [syslog(3)](https://linux.die.net/man/3/syslog).
-
-Cross Compilation
------------------
-
-When cross compiling syslogger you need to set the correct environment variables
-as you normally would. The configure flags (i.e. `--host=`, `--build=` etc) should be
-passed through the `CONFIGURE_FLAGS` environment variable. You also have to make sure
-that the `CPPFLAGS` include the path to the erlang include files.
-
-Example:
-
-```
-CONFIGURE_FLAGS="--build i686-pc-linux-gnu --host i586-mingw32msvc" CPPFLAGS="-I /cross/compiled/erlang/usr/include" rebar3 compile
-```
