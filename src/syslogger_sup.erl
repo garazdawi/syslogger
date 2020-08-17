@@ -1,8 +1,3 @@
-%%%-------------------------------------------------------------------
-%% @doc syslogger top level supervisor.
-%% @end
-%%%-------------------------------------------------------------------
-
 -module(syslogger_sup).
 
 -behaviour(supervisor).
@@ -13,20 +8,11 @@
 %% Supervisor callbacks
 -export([init/1]).
 
--define(SERVER, ?MODULE).
-
-%%====================================================================
 %% API functions
-%%====================================================================
-
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%%====================================================================
 %% Supervisor callbacks
-%%====================================================================
-
-%% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
     ok = syslogger:open(
            application:get_env(syslogger, ident, undefined),
@@ -35,7 +21,3 @@ init([]) ->
           ),
     logger:add_handlers(syslogger),
     {ok, { {one_for_all, 0, 1}, []} }.
-
-%%====================================================================
-%% Internal functions
-%%====================================================================

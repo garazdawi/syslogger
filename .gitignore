@@ -2,6 +2,7 @@
 _*
 .eunit
 *.o
+*.d
 *.beam
 *.plt
 *.swp
@@ -16,6 +17,10 @@ _build
 .idea
 *.iml
 rebar3.crashdump
+*~
+*.vim
+tags
+priv/
 
 # http://www.gnu.org/software/automake
 

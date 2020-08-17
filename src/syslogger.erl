@@ -1,25 +1,22 @@
-%%%-------------------------------------------------------------------
-%% @doc syslogger handler
-%% @end
-%%%-------------------------------------------------------------------
-
 -module(syslogger).
 
--on_load(init/0).
--define(APPNAME, syslogger).
+-on_load(load/0).
 -define(LIBNAME, libsyslogger).
 
 -export([adding_handler/1, log/2, open/3]).
 
-adding_handler(#{ facility := Facility } = Config) ->
-    SysLoggerConfig = syslog_init(Facility),
-    {ok, Config#{ syslogger => SysLoggerConfig} };
+default_config() ->
+    #{facility => undefined}.
+
 adding_handler(Config) ->
-    adding_handler(Config#{ facility => undefined }).
+    HConfig0 = maps:get(config, Config, #{}),
+    HConfig = maps:merge(default_config(), HConfig0),
+    SysLoggerConfig = syslog_init(maps:get(facility, HConfig)),
+    {ok, Config#{ config => maps:merge(SysLoggerConfig, HConfig)} }.
 
 
 log(Log = #{ level := Level }, #{ formatter := {FModule, FConfig},
-                                  syslogger :=
+                                  config :=
                                       #{bfacility := Facility,
                                         level_map := LevelMap
                                        }
@@ -43,10 +40,11 @@ syslog_open(_Ident, _LogOpts, _Facility) ->
 syslog_init(_Facility) ->
     not_loaded(?LINE).
 
-syslog(_LevelFacility, _Str) -> not_loaded(?LINE).
+syslog(_LevelFacility, _Str) ->
+    not_loaded(?LINE).
 
-init() ->
-    SoName = case code:priv_dir(?APPNAME) of
+load() ->
+    SoName = case code:priv_dir(?MODULE) of
         {error, bad_name} ->
             case filelib:is_dir(filename:join(["..", priv, lib])) of
                 true ->
