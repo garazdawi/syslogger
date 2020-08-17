@@ -31,6 +31,8 @@ log(Log = #{ level := Level }, #{ formatter := {FModule, FConfig},
 open(undefined, LogOpts, Facility) ->
     {ok, [Progname]} = init:get_argument(progname),
     open(filename:basename(Progname), LogOpts, Facility);
+open(Ident, undefined, Facility) ->
+    open(Ident, [], Facility);
 open(Ident, LogOpts, Facility) ->
     MapLogOpts = maps:from_list(proplists:unfold(LogOpts)),
     syslog_open([Ident,$\0], MapLogOpts, Facility).
