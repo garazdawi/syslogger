@@ -32,7 +32,8 @@ open(Ident, undefined, Facility) ->
     open(Ident, [], Facility);
 open(Ident, LogOpts, Facility) ->
     MapLogOpts = maps:from_list(proplists:unfold(LogOpts)),
-    syslog_open([Ident,$\0], MapLogOpts, Facility).
+    Id = iolist_to_binary(Ident ++ [$\0]),
+    syslog_open(Id, MapLogOpts, Facility).
 
 syslog_open(_Ident, _LogOpts, _Facility) ->
     not_loaded(?LINE).

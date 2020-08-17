@@ -29,6 +29,8 @@
 ATOMS
 #undef ATOM_DECL
 
+static ErlNifBinary ident;
+
 static int load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
 
@@ -75,7 +77,6 @@ open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     int facility = get_facility(env, argv[2]);
     int logopts = 0;
-    ErlNifBinary ident;
     ERL_NIF_TERM value;
 
     if (enif_inspect_iolist_as_binary(env, argv[0], &ident) == 0)
