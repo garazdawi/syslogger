@@ -1,7 +1,7 @@
 -module(syslogger_SUITE).
 
 -export([all/0, init_per_testcase/2, end_per_testcase/2]).
--export([basic/1, basic/2, config/1, config/2]).
+-export([basic/1, config/1]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -11,10 +11,16 @@ all() ->
 init_per_testcase(_TC, Config) ->
     Config.
 
-end_per_testcase(TC, Config) ->
-    try apply(?MODULE,TC,[cleanup,Config])
-    catch error:undef -> ok
-    end,
+end_per_testcase(basic, _Config) ->
+    logger:remove_handler(user_syslogger),
+    logger:remove_handler(local0_syslogger),
+    ok;
+end_per_testcase(config, _Config) ->
+    logger:remove_handler(user),
+    application:set_env(syslogger, ident, undefined),
+    application:set_env(syslogger, log_opts, undefined),
+    application:stop(syslogger),
+    application:unload(syslogger),
     ok.
 
 basic(_Config) ->
@@ -29,10 +35,6 @@ basic(_Config) ->
     ?LOG_ERROR("test log message"),
     ok = assert_syslog("error: test log message").
 
-basic(cleanup,_Config) ->
-    logger:remove_handler(user_syslogger),
-    logger:remove_handler(local0_syslogger).
-
 config(_Config) ->
     ok = application:load(syslogger),
     ok = application:set_env(syslogger, ident, "testytest"),
@@ -43,12 +45,6 @@ config(_Config) ->
     assert_syslog(os:getpid()),
     assert_syslog("error: testy log message"),
     assert_syslog("testytest").
-
-config(cleanup,_Config) ->
-    logger:remove_handler(user),
-    application:set_env(syslogger, undefined),
-    application:stop(syslogger),
-    application:unload(syslogger).
 
 assert_syslog(Match) ->
     timer:sleep(500), %% Allow log message to travel to log
