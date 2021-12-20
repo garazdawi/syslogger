@@ -1,6 +1,6 @@
 {application, syslogger,
  [{description, "A syslog backend for Erlang logger"},
-  {vsn, "0.1.0"},
+  {vsn, "0.2.0"},
   {registered, []},
   {mod, { syslogger_app, []}},
   {applications,
