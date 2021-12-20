@@ -47,16 +47,16 @@ static void unload(ErlNifEnv* env, void* priv_data)
 }
 
 static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data,
-		   ERL_NIF_TERM load_info)
+        ERL_NIF_TERM load_info)
 {
     if (*old_priv_data != NULL) {
-	return -1; /* Don't know how to do that */
+        return -1; /* Don't know how to do that */
     }
     if (*priv_data != NULL) {
-	return -1; /* Don't know how to do that */
+        return -1; /* Don't know how to do that */
     }
     if (load(env, priv_data, load_info)) {
-	return -1;
+        return -1;
     }
     return 0;
 }
