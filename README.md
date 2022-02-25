@@ -1,7 +1,7 @@
 syslogger
 =====
 
-A syslog backend for erlang logger.. This is a fork of the syslogger with update to the application configuration settings
+A syslog backend for erlang logger.
 
 Usage
 -----
@@ -11,7 +11,7 @@ in your rebar.config like this:
 
     {deps,
      [
-      { 'syslogger', "*", {git, "https://github.com/sadekoya/syslogger.git", {branch, "master"}}}
+      { 'syslogger', "*", {git, "git://github.com/garazdawi/syslogger", {branch, "master"}}}
      ]
     }.
 
@@ -55,7 +55,7 @@ facilities just add this to your sys.config.
       	}}]}]
     }.	
 
-This will add a syslogger instances to the Erlang l
+This will add a syslogger instance to the Erlang 
 
 Each syslogger handler can be configured using a map with these configuration options:
 
