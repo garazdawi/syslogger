@@ -43,23 +43,19 @@ Configuration
 The syslogger application can be used either by configuring the handlers through
 application variables, or by using the `logger:add_handler/2` API.
 
-For instance if you want to add two handlers that log to two different syslog
+For instance if you want to add an handler that log to local0 syslog
 facilities just add this to your sys.config.
 
-    {syslogger,
-      {ident, "myapp"},
-      {log_opts, [cons, pid, perror]},
-      {logger, [{handler, user_syslogger, syslogger, #{ facility => user }},
-                {handler, local0_syslogger, syslogger, #{ facility => local0 }}]
-       }
-    }.
+    {syslogger, [
+  	{logger, [
+      	  {handler, local0_syslogger, syslogger,
+      	    #{
+      		config => #{ facility => local0 },
+      		formatter => {logger_formatter, #{single_line => true}}
+      	}}]}]
+    }.	
 
-This will add two syslogger instances to the Erlang logger that use different facilities.
-
-The same effect could have been achieved by using the logger API like this:
-
-    logger:add_handler(user_syslogger, syslogger, #{ facility => user }),
-    logger:add_handler(local0_syslogger, syslogger, #{ facility => local0 }).
+This will add a syslogger instance to the Erlang 
 
 Each syslogger handler can be configured using a map with these configuration options:
 
