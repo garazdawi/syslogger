@@ -21,4 +21,4 @@ c_src/Makefile: c_src/configure
 	(cd c_src && ./configure --prefix=$(shell pwd)/priv ${CONFIGURE_FLAGS})
 
 clean_nif:
-	make -C c_src clean uninstall
+	- make -C c_src clean uninstall
